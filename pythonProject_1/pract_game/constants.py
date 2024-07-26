@@ -1,2 +1,2 @@
-TICK = 0.15
+WAITING = 0.15
 CLEAR = 'cls'

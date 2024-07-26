@@ -10,6 +10,9 @@ class Map:
         self.noise = Perlin(random.randint(self.w + self.h, self.w * self.h))
         self.map = [[Cell.EMPTY for j in range(w)] for k in range(h)]
 
+    def check_bound(self, x, y):
+        return not (x < 0 or y < 0 or x >= self.w or y >= self.h)
+
     def generate_map(self, rivers=(), forest=()):
         if not rivers:
             rivers = self.rivers
@@ -19,9 +22,6 @@ class Map:
         self.__generate_forest(noise_scale=forest[0], threshold=forest[-1])
         return self.map
 
-    def check_bound(self, x, y):
-        return not (x < 0 or y < 0 or x >= self.w or y >= self.h)
-
     def print_map(self):
         print(Cell.BLOCK * (self.w + 2))
         for row in self.map:
@@ -30,6 +30,20 @@ class Map:
                 print(cell, end='')
             print(Cell.BLOCK)
         print(Cell.BLOCK * (self.w + 2))
+
+    def update_forest(self):
+        for y in range(self.h):
+            for x in range(self.w):
+                if self.map[y][x] == Cell.TREE:
+                    available_coordinates = (((k, j) for k in (-1, 0, 1) if k != 0 and j != 0) for j in (-1, 0, 1))
+                    for dx, dy in available_coordinates:
+                        if not self.check_bound(x + dx, y + dy):
+                            continue
+                        if self.map[y + dy][x + dx] not in (Cell.RIVER,) and\
+                           not self.__is_adjacent_to_river(x + dx, y + dy) and\
+                           random.randint(0, 1):
+                            self.map[y + dy][x + dx] = Cell.TREE
+                            return
 
     def __generate_rivers(self, noise_scale, threshold):
         for y in range(self.h):
