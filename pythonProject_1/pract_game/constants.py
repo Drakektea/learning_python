@@ -13,13 +13,13 @@ FIRE_DOWN_UPDATE = 3
 CLEAR = 'cls'
 
 
-def IS_OBJECT(_object: Cell) -> Callable:
-    def FOR_TYPE(_type: Cell) -> bool:
+def is_object(_type: Cell) -> Callable:
+    def check_with_type(_object: Cell) -> bool:
         return _object == _type
-    return FOR_TYPE
+    return check_with_type
 
 
-IS_EMPTY = IS_OBJECT(Cell.EMPTY)
-IS_TREE = IS_OBJECT(Cell.TREE)
-IS_WATER = IS_OBJECT(Cell.WATER)
-IS_FIRE = IS_OBJECT(Cell.FIRE)
+IS_EMPTY = is_object(Cell.EMPTY)
+IS_TREE = is_object(Cell.TREE)
+IS_WATER = is_object(Cell.WATER)
+IS_FIRE = is_object(Cell.FIRE)

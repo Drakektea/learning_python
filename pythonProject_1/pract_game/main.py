@@ -1,4 +1,5 @@
 from map import Map
+from helicopter import Helicopter
 from constants import (WAITING, TREE_UPDATE,
                        FIRE_UP_UPDATE, FIRE_DOWN_UPDATE,
                        TICK, CLEAR)
@@ -9,6 +10,8 @@ from time import sleep
 
 game_map = Map()
 game_map.generate_map()
+
+game_helicopter = Helicopter(game_map)
 
 while True:
     TICK += 1

@@ -32,11 +32,15 @@ class Map:
             self.map = [[Cell.EMPTY for k in range(self.w)] for j in range(self.h)]
             return self.generate_map(rivers, forest)
 
-    def print_map(self):
+    def print_map(self, main_helicopter):
         print(Cell.BLOCK * (self.w + 2))
-        for row in self.map:
+        for row in range(len(self.map)):
             print(Cell.BLOCK, end='')
-            for cell in row:
+            for column in range(len(self.map[row])):
+                if (row, column) == main_helicopter.xy:
+                    cell = Cell.HELICOPTER
+                else:
+                    cell = self.map[row][column]
                 print(cell, end='')
             print(Cell.BLOCK)
         print(Cell.BLOCK * (self.w + 2))
@@ -146,7 +150,7 @@ class Map:
         self.map[fire_y][fire_x] = Cell.EMPTY
 
     def __get_objects(self, condition):
-        return tuple((x, y) for y in range(self.h) for x in range(self.w) if condition(self.map[y][x]))
+        return tuple((x, y) for x, y in self.all_coordinates if condition(self.map[y][x]))
 
     def __generate_rivers(self, noise_scale, threshold):
         for y in range(self.h):
@@ -187,4 +191,8 @@ class Map:
 map_size = 30
 game_map = Map(map_size, map_size)
 game_map.generate_map()
-game_map.print_map()
+
+from helicopter import Helicopter
+game_helicopter = Helicopter(game_map)
+
+game_map.print_map(game_helicopter)
