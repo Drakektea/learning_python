@@ -24,14 +24,13 @@ class Map:
 
         self.__generate_rivers(noise_scale=rivers[0], threshold=rivers[-1])
         self.__generate_forest(noise_scale=forest[0], threshold=forest[-1])
+        self.__generate_fire()
 
         tree_count = sum(1 for y in range(self.h) for x in range(self.w) if self.map[y][x] == Cell.TREE)
         if tree_count < 10:
             self.noise = Perlin(random.randint(self.w + self.h, self.w * self.h))
             self.map = [[Cell.EMPTY for k in range(self.w)] for j in range(self.h)]
             return self.generate_map(rivers, forest)
-
-        self.__generate_fire()
 
     def print_map(self):
         print(Cell.BLOCK * (self.w + 2))
@@ -82,7 +81,7 @@ class Map:
         self.map[new_tree_position[1]][new_tree_position[0]] = Cell.TREE
 
     def update_fire_up(self):
-        fire_coordinates = tuple(filter(IS_FIRE, self.all_coordinates))
+        fire_coordinates = self.__get_objects(IS_FIRE)
         if fire_coordinates:
             random_fire = random.choice(fire_coordinates)
             fire_x, fire_y = random_fire
@@ -106,7 +105,7 @@ class Map:
         if not random.random() < 0.1:
             return
 
-        tree_coordinates = tuple(filter(IS_TREE, self.all_coordinates))
+        tree_coordinates = self.__get_objects(IS_TREE)
         if not tree_coordinates:
             return
 
@@ -114,7 +113,7 @@ class Map:
         self.map[random_tree[1]][random_tree[0]] = Cell.FIRE
 
     def update_fire_down(self):
-        fire_coordinates = tuple(filter(IS_FIRE, self.all_coordinates))
+        fire_coordinates = self.__get_objects(IS_FIRE)
         if not fire_coordinates:
             return
 
@@ -146,9 +145,8 @@ class Map:
 
         self.map[fire_y][fire_x] = Cell.EMPTY
 
-    def __get_objects(self, _condition):
-        return tuple((x, y) for y in range(self.h)
-                     for x in range(self.w) if _condition(self.map[y][x]))
+    def __get_objects(self, condition):
+        return tuple((x, y) for y in range(self.h) for x in range(self.w) if condition(self.map[y][x]))
 
     def __generate_rivers(self, noise_scale, threshold):
         for y in range(self.h):
@@ -167,7 +165,7 @@ class Map:
                     self.map[y][x] = Cell.TREE
 
     def __generate_fire(self, num_trees_to_burn=3):
-        tree_coordinates = tuple(filter(IS_TREE, self.all_coordinates))
+        tree_coordinates = self.__get_objects(IS_TREE)
         if not tree_coordinates:
             return
 
@@ -186,9 +184,7 @@ class Map:
         return False
 
 
-'''
 map_size = 30
 game_map = Map(map_size, map_size)
 game_map.generate_map()
 game_map.print_map()
-'''

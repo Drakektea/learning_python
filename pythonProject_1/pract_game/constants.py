@@ -13,8 +13,8 @@ FIRE_DOWN_UPDATE = 3
 CLEAR = 'cls'
 
 
-def IS_OBJECT(_object) -> Callable:
-    def FOR_TYPE(_type) -> bool:
+def IS_OBJECT(_object: Cell) -> Callable:
+    def FOR_TYPE(_type: Cell) -> bool:
         return _object == _type
     return FOR_TYPE
 
