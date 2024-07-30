@@ -3,10 +3,10 @@ from typing import Callable
 from additional_components import Cell
 
 
-WAITING = 0.2
+WAITING = 1 / 15
 TICK = 0
 
-TREE_UPDATE = 5
+TREE_UPDATE = 3
 FIRE_UP_UPDATE = 4
 FIRE_DOWN_UPDATE = 3
 

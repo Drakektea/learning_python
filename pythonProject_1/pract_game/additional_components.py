@@ -16,3 +16,6 @@ class Cell(StrEnum):
     STORM = '🌩️'
     FIRE = '🔥'
     WATER = '💧'
+
+
+
