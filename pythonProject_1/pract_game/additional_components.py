@@ -3,6 +3,7 @@ from enum import StrEnum, unique
 
 @unique
 class Cell(StrEnum):
+    CLOCKS = '🕛🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚'
     BLOCK = '🚫'
     REWARD = '🏆'
     HP = '⚙️'
@@ -16,6 +17,3 @@ class Cell(StrEnum):
     STORM = '🌩️'
     FIRE = '🔥'
     WATER = '💧'
-
-
-

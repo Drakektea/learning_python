@@ -1,15 +1,16 @@
-import random
+from random import randint, random, choice, sample
 
 from perlin import Perlin
 from additional_components import Cell
-from constants import IS_TREE, IS_EMPTY, IS_FIRE
+from constants import (IS_TREE, IS_EMPTY, IS_FIRE,
+                       REWARDS, BURN_TREE_PENALTY)
 
 
 class Map:
     def __init__(self, w=30, h=30):
         self.w, self.h = max(10, w), max(10, h)
         self.rivers, self.forest = ((w + h) // 2 / 4, -0.15), ((w + h) // 2 / 3, 0)
-        self.noise = Perlin(random.randint(w + h, w * h))
+        self.noise = Perlin(randint(w + h, w * h))
         self.map = [[Cell.EMPTY for k in range(w)] for j in range(h)]
         self.all_coordinates = [(x, y) for y in range(h) for x in range(w)]
 
@@ -25,10 +26,11 @@ class Map:
         self.__generate_rivers(noise_scale=rivers[0], threshold=rivers[-1])
         self.__generate_forest(noise_scale=forest[0], threshold=forest[-1])
         self.__generate_fire()
+        self.__generate_shop()
 
         tree_count = sum(1 for y in range(self.h) for x in range(self.w) if self.map[y][x] == Cell.TREE)
         if tree_count < 10:
-            self.noise = Perlin(random.randint(self.w + self.h, self.w * self.h))
+            self.noise = Perlin(randint(self.w + self.h, self.w * self.h))
             self.map = [[Cell.EMPTY for k in range(self.w)] for j in range(self.h)]
             return self.generate_map(rivers, forest)
 
@@ -37,7 +39,7 @@ class Map:
         if not tree_coordinates:
             return
 
-        random_tree = random.choice(tree_coordinates)
+        random_tree = choice(tree_coordinates)
         tree_x, tree_y = random_tree
 
         available_coordinates = []
@@ -58,7 +60,14 @@ class Map:
 
         if not available_coordinates:
             return
-        if not random.random() < 0.05:
+
+        if not random() < 0.6:
+            return
+
+        new_tree_position = choice(available_coordinates)
+        self.map[new_tree_position[1]][new_tree_position[0]] = Cell.TREE
+
+        if not random() < 0.01:
             return
 
         available_coordinates = []
@@ -68,13 +77,13 @@ class Map:
                 continue
             available_coordinates.append((x, y))
 
-        new_tree_position = random.choice(available_coordinates)
+        new_tree_position = choice(available_coordinates)
         self.map[new_tree_position[1]][new_tree_position[0]] = Cell.TREE
 
     def update_fire_up(self):
         fire_coordinates = self.__get_objects(IS_FIRE)
         if fire_coordinates:
-            random_fire = random.choice(fire_coordinates)
+            random_fire = choice(fire_coordinates)
             fire_x, fire_y = random_fire
 
             for dy in [-1, 0, 1]:
@@ -87,20 +96,20 @@ class Map:
                         continue
                     if not self.map[neighbor_y][neighbor_x] == Cell.TREE:
                         continue
-                    if not random.random() < 0.3:
+                    if not random() < 0.3:
                         continue
 
                     self.map[neighbor_y][neighbor_x] = Cell.FIRE
                     return
 
-        if not random.random() < 0.1:
+        if not random() < 0.1:
             return
 
         tree_coordinates = self.__get_objects(IS_TREE)
         if not tree_coordinates:
             return
 
-        random_tree = random.choice(tree_coordinates)
+        random_tree = choice(tree_coordinates)
         self.map[random_tree[1]][random_tree[0]] = Cell.FIRE
 
     def update_fire_down(self):
@@ -108,9 +117,9 @@ class Map:
         if not fire_coordinates:
             return
 
-        random_fire = random.choice(fire_coordinates)
+        random_fire = choice(fire_coordinates)
         fire_x, fire_y = random_fire
-        if not random.random() < 0.4:
+        if not random() < 0.4:
             return
 
         adjacent_trees = []
@@ -129,11 +138,12 @@ class Map:
 
         if adjacent_trees:
             num_trees_to_burn = min(3, len(adjacent_trees) - 1)
-            trees_to_burn = random.sample(adjacent_trees, num_trees_to_burn)
+            trees_to_burn = sample(adjacent_trees, num_trees_to_burn)
 
             for tree_x, tree_y in trees_to_burn:
                 self.map[tree_y][tree_x] = Cell.FIRE
 
+        REWARDS.current_value += BURN_TREE_PENALTY
         self.map[fire_y][fire_x] = Cell.EMPTY
 
     def __get_objects(self, condition):
@@ -160,10 +170,27 @@ class Map:
         if not tree_coordinates:
             return
 
-        trees_to_burn = random.sample(tree_coordinates, num_trees_to_burn)
+        trees_to_burn = sample(tree_coordinates, num_trees_to_burn)
 
         for tree_x, tree_y in trees_to_burn:
             self.map[tree_y][tree_x] = Cell.FIRE
+
+    def __generate_shop(self):
+        empty_coordinates = self.__get_objects(IS_EMPTY)
+        if not empty_coordinates:
+            return
+
+        adjacent_empty = []
+        for x, y in empty_coordinates:
+            if self.__is_adjacent_to_river(x, y):
+                continue
+            adjacent_empty.append((x, y))
+        
+        if not adjacent_empty:
+            return 
+        
+        empty_cell = choice(adjacent_empty)
+        self.map[empty_cell[1]][empty_cell[0]] = Cell.SHOP
 
     def __is_adjacent_to_river(self, x, y):
         for dy in [-1, 0, 1]:
