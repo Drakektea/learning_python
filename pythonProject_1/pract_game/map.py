@@ -26,7 +26,8 @@ class Map:
         self.__generate_rivers(noise_scale=rivers[0], threshold=rivers[-1])
         self.__generate_forest(noise_scale=forest[0], threshold=forest[-1])
         self.__generate_fire()
-        self.__generate_shop()
+        self.__generate_object(Cell.SHOP)
+        self.__generate_object(Cell.HP_RECOVERY)
 
         tree_count = sum(1 for y in range(self.h) for x in range(self.w) if self.map[y][x] == Cell.TREE)
         if tree_count < 10:
@@ -175,7 +176,7 @@ class Map:
         for tree_x, tree_y in trees_to_burn:
             self.map[tree_y][tree_x] = Cell.FIRE
 
-    def __generate_shop(self):
+    def __generate_object(self, _object: Cell):
         empty_coordinates = self.__get_objects(IS_EMPTY)
         if not empty_coordinates:
             return
@@ -190,7 +191,7 @@ class Map:
             return 
         
         empty_cell = choice(adjacent_empty)
-        self.map[empty_cell[1]][empty_cell[0]] = Cell.SHOP
+        self.map[empty_cell[1]][empty_cell[0]] = _object
 
     def __is_adjacent_to_river(self, x, y):
         for dy in [-1, 0, 1]:

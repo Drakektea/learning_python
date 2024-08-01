@@ -1,5 +1,5 @@
+from curses import wrapper, curs_set
 from time import sleep
-from os import system
 from helicopter import Helicopter
 from clouds import Clouds
 from map import Map
@@ -7,10 +7,14 @@ from stats import Statistic
 from connector import GameConnector, KeyBoardMoveButtons
 from constants import (WAITING, TREE_UPDATE, FIRE_UP_UPDATE,
                        FIRE_DOWN_UPDATE, FRAMES, UPDATE_CLOUD,
-                       WATER, REWARDS, HP, CLEAR)
+                       WATER, REWARDS, HP)
 
 
-def main():
+def main(stdscr):
+    curs_set(0)
+    stdscr.nodelay(1)
+    stdscr.timeout(int(WAITING * 1000))
+
     game_map = Map()
     game_map.generate_map()
     game_clouds = Clouds(game_map)
@@ -43,10 +47,11 @@ def main():
 
         output = 'user: ' + str(game_helicopter.xy) + '\n' + game.print_all()
 
-        system(CLEAR)
-        print(output)
+        stdscr.clear()
+        stdscr.addstr(output)
         sleep(WAITING)
+        stdscr.refresh()
 
 
 if __name__ == "__main__":
-    main()
+    wrapper(main)

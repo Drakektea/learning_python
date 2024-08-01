@@ -1,16 +1,20 @@
 from threading import Timer
 from random import choice
-from constants import (Item, Cell, IS_RIVER, IS_FIRE, IS_SHOP,
+from constants import (Item, Cell, IS_HP_RECOVERY,
+                       IS_RIVER, IS_FIRE, IS_SHOP, IS_STORMCLOUD,
                        SAVE_TREE_BONUS, UPGRADE_COST,
-                       SHOP_WAITING_SECONDS)
+                       SHOP_WAITING_SECONDS, HP_COST)
 
 
 class Helicopter:
-    def __init__(self, main_map, water: Item, rewards: Item):
+    def __init__(self, main_map, main_clouds,
+                 water: Item, rewards: Item, hp: Item):
         self.map = main_map
+        self.clouds = main_clouds
         self.x, self.y = choice(main_map.all_coordinates)
         self.water = water
         self.rewards = rewards
+        self.hp = hp
 
     @property
     def x(self):
@@ -44,18 +48,27 @@ class Helicopter:
             self.y += xy[1]
 
     def processing(self):
-        current_cell = self.map.map[self.y][self.x]
-        if IS_RIVER(current_cell):
+        current_map_cell = self.map.map[self.y][self.x]
+        current_cloud_cell = self.clouds.cloud_map[self.y][self.x]
+        if IS_RIVER(current_map_cell):
             self.water.current_value = self.water.max_value
-        elif IS_FIRE(current_cell) and self.water.in_min_max:
+        elif IS_FIRE(current_map_cell) and self.water.in_min_max:
             self.water.current_value -= 1
             self.rewards.current_value += SAVE_TREE_BONUS
             self.map.map[self.y][self.x] = Cell.TREE
-        elif IS_SHOP(current_cell) and \
+        elif IS_SHOP(current_map_cell) and \
                 self.rewards.min_value < self.rewards.current_value - UPGRADE_COST:
             self.rewards.current_value -= UPGRADE_COST
             self.water.max_value += 1
             self.__waiting_shop(self.xy)
+        elif IS_HP_RECOVERY(current_map_cell):
+            money = max(0, self.rewards.current_value)
+            lost_hp = self.hp.max_value - self.hp.current_value
+            hp_to_recover = min(lost_hp, money // HP_COST)
+            self.hp.current_value += hp_to_recover
+            self.rewards.current_value -= hp_to_recover * HP_COST
+        if IS_STORMCLOUD(current_cloud_cell):
+            self.hp.current_value -= 1
 
     def __waiting_shop(self, coordinate):
         self.map.map[coordinate[1]][coordinate[0]] = Cell.BLOCK
