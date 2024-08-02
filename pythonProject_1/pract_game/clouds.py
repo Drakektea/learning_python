@@ -15,6 +15,14 @@ class Clouds:
         self.time_step = 0
         self.cloud_threshold = 0.1
 
+    def export_data(self):
+        return {
+            'wind_direction': self.wind_direction.value,
+            'cloud_map': self.cloud_map,
+            'time_step': self.time_step,
+            'cloud_threshold': self.cloud_threshold
+        }
+
     def check_bound(self, x, y):
         return not (x < 0 or y < 0 or x >= self.w or y >= self.h)
 

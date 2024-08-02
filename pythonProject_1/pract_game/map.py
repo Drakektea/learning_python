@@ -13,6 +13,17 @@ class Map:
         self.noise = Perlin(randint(w + h, w * h))
         self.map = [[Cell.EMPTY for k in range(w)] for j in range(h)]
         self.all_coordinates = [(x, y) for y in range(h) for x in range(w)]
+        self.burn_trees = 0
+        self.born_trees = 0
+
+    def export_data(self):
+        return {
+            'w': self.w,
+            'h': self.h,
+            'map': self.map,
+            'burn_trees': self.burn_trees,
+            'born_trees': self.born_trees,
+        }
 
     def check_bound(self, x, y):
         return not (x < 0 or y < 0 or x >= self.w or y >= self.h)
@@ -67,6 +78,7 @@ class Map:
 
         new_tree_position = choice(available_coordinates)
         self.map[new_tree_position[1]][new_tree_position[0]] = Cell.TREE
+        self.born_trees += 1
 
         if not random() < 0.01:
             return
@@ -80,6 +92,7 @@ class Map:
 
         new_tree_position = choice(available_coordinates)
         self.map[new_tree_position[1]][new_tree_position[0]] = Cell.TREE
+        self.born_trees += 1
 
     def update_fire_up(self):
         fire_coordinates = self.__get_objects(IS_FIRE)
@@ -146,6 +159,7 @@ class Map:
 
         REWARDS.current_value += BURN_TREE_PENALTY
         self.map[fire_y][fire_x] = Cell.EMPTY
+        self.burn_trees += 1
 
     def __get_objects(self, condition):
         return tuple((x, y) for x, y in self.all_coordinates if condition(self.map[y][x]))
