@@ -71,7 +71,7 @@ class GameConnector:
         map_stats = {
             'деревьев выросло': self.map.born_trees,
             'деревьев сгорело': self.map.burn_trees,
-            'очков потеряно': self.map.burn_trees * BURN_TREE_PENALTY,
+            'очков потеряно': abs(self.map.burn_trees * BURN_TREE_PENALTY),
         }
         user_stats = {
             'очков получено': self.helicopter.got_rewards,

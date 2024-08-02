@@ -73,8 +73,8 @@ class Helicopter:
         current_map_cell = self.map.map[self.y][self.x]
         current_cloud_cell = self.clouds.cloud_map[self.y][self.x]
         if IS_RIVER(current_map_cell):
-            self.water.current_value = self.water.max_value
             self.got_water += (self.water.max_value - self.water.current_value)
+            self.water.current_value = self.water.max_value
         elif IS_FIRE(current_map_cell) and self.water.in_min_max:
             self.water.current_value -= 1
             self.rewards.current_value += SAVE_TREE_BONUS
