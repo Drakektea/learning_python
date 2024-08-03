@@ -116,7 +116,7 @@ def main(stdscr):
             game.print_statistic(TICK)
             break
         elif REWARDS.current_value >= REWARDS.max_value:
-            game.win(f'Вы набрали {HP.current_value} из {HP.max_value} очков')
+            game.win(f'Вы набрали {REWARDS.current_value} из {REWARDS.max_value} очков')
             game.print_statistic(TICK)
             break
         stdscr.addstr(output)
